@@ -72,7 +72,7 @@ func createSpeaker(s *Speaker) {
 	if err != nil {
 		panic(err)
 	}
-	f, err := os.OpenFile(filepath.Join(wd, "speakers", s.ID+".md"), os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	f, err := os.OpenFile(filepath.Join(wd, "speakers", fmt.Sprintf("s.md", s.ID)), os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -128,7 +128,7 @@ func createSession(s *Speaker) {
 	if err != nil {
 		panic(err)
 	}
-	f, err := os.OpenFile(filepath.Join(wd, "sessions", s.SessionID+".md"), os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	f, err := os.OpenFile(filepath.Join(wd, "sessions", fmt.Sprintf("session-%s.md", s.SessionID)), os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
