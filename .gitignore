@@ -1,0 +1,4 @@
+/speakers/*.md
+!/speakers/.keep
+/speakers.csv
+
