@@ -24,6 +24,7 @@ type Speaker struct {
 	ShirtSize      string `csv:"shirt_size"`
 	TalkFormat     string `csv:"talk_format"`
 	Title          string `csv:"title"`
+	SessionID      string `csv:"session_id"`
 	Abstract       string `csv:"abstract"`
 	Description    string `csv:"description"`
 	Notes          string `csv:"notes"`
@@ -50,6 +51,20 @@ type Social struct {
 	Icon string
 	Link string
 	Name string
+}
+
+type SessionContent struct {
+	Key          string
+	Title        string
+	ID           string
+	Format       string
+	TalkType     string `yaml:"talkType"`
+	Level        string
+	Tags         []string
+	Speakers     []string
+	VideoID      *string `yaml:"videoId"`
+	Presentation *string
+	Draft        bool
 }
 
 func createSpeaker(s *Speaker) {
@@ -108,6 +123,54 @@ func createSpeaker(s *Speaker) {
 	}
 }
 
+func createSession(s *Speaker) {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	f, err := os.OpenFile(filepath.Join(wd, "sessions", s.SessionID+".md"), os.O_WRONLY|os.O_CREATE, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	var talkType string
+	switch s.TalkFormat {
+	case "Lightning Talk: 5 minutes":
+		talkType = "lightning_talk"
+	default:
+		// 他はやらない
+		panic(s.TalkFormat)
+	}
+
+	sc := &SessionContent{
+		Key:      s.SessionID,
+		Title:    s.Title,
+		ID:       s.SessionID,
+		Format:   "conference",
+		TalkType: talkType,
+		Level:    strings.ToLower(s.AudienceLevel),       // e.g. `Advanced` => `advanced`
+		Tags:     []string{strings.ToUpper(s.SessionID)}, // e.g. `lt1` => `LT1`
+		Speakers: []string{s.ID},
+		Draft:    false,
+	}
+
+	out, err := yaml.Marshal(sc)
+	if err != nil {
+		panic(err)
+	}
+	body := fmt.Sprintf(`---
+%s---
+%s
+---
+%s`, string(out), s.Abstract, s.Description)
+
+	_, err = f.WriteString(body)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	f, err := os.Open("speakers.csv")
 	if err != nil {
@@ -120,10 +183,14 @@ func main() {
 		panic(err)
 	}
 	for _, s := range speakers {
-		//fmt.Println("%#v\n", speaker)
 		if s.State != "accepted" {
 			continue
 		}
 		createSpeaker(s)
+
+		if s.SessionID == "" {
+			continue
+		}
+		createSession(s)
 	}
 }
