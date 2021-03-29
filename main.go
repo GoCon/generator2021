@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gocarina/gocsv"
 	"gopkg.in/yaml.v2"
 )
+
+const GitHubURLPrefix = "https://github.com/"
 
 type Speaker struct {
 	Name           string `csv:"name"`
@@ -39,7 +42,7 @@ type SpeakerContent struct {
 	ID       string
 	Company  string
 	Feature  bool
-	PhotoURL string
+	PhotoURL string `yaml:"photoURL"`
 	Socials  []*Social
 }
 
@@ -72,16 +75,22 @@ func createSpeaker(s *Speaker) {
 	if s.Twitter != "" {
 		sc.Socials = append(sc.Socials, &Social{
 			Icon: "twitter",
-			Link: fmt.Sprintf("http://twitter.com/%s", s.Twitter),
+			Link: fmt.Sprintf("https://twitter.com/%s", s.Twitter),
 			Name: s.Twitter,
 		})
 	}
 
 	if s.URL != "" {
+		icon := "link"
+		name := "website"
+		if strings.HasPrefix(s.URL, GitHubURLPrefix) {
+			icon = "github"
+			name = strings.TrimPrefix(s.URL, GitHubURLPrefix)
+		}
 		sc.Socials = append(sc.Socials, &Social{
-			Icon: "link",
+			Icon: icon,
 			Link: s.URL,
-			Name: "website",
+			Name: name,
 		})
 	}
 
