@@ -1,6 +1,6 @@
-/speakers/*.md
-!/speakers/.keep
-/sessions/*.md
-!/sessions/.keep
-/speakers.csv
+/speakers/**/*
+/sessions/**/*
+/partners/**/*
 
+/speakers.csv
+/partners.csv
